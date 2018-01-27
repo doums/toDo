@@ -2,13 +2,15 @@ package com.todo.app
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.PorterDuff
 import android.support.v4.app.DialogFragment
 import android.os.Bundle
+import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
-import android.util.Log
+import android.view.ActionMode
 import android.view.View
 import android.view.Menu
 import android.view.MenuItem
@@ -21,6 +23,60 @@ class MainActivity
         ColorDialogFragment.ColorDialogListener
 {
     private lateinit var adapter: TaskAdapter
+    private var selectedTasks = mutableMapOf<Int, View>()
+    private lateinit var actionMode: ActionMode
+    var onMultiSelect: Boolean = false
+
+    private var actionModeCallback = object:ActionMode.Callback {
+        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+            mode.menuInflater?.inflate(R.menu.menu_context, menu)
+            onMultiSelect = true
+            return true
+        }
+
+        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+            return false
+        }
+
+        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+            val id = item.itemId
+
+            return when (id) {
+                R.id.action_delete_task -> {
+                    for (task in selectedTasks)
+                        adapter.removeTask(task.key)
+                    mode.finish()
+                    true
+                }
+                R.id.action_color -> {
+                    showColorDialog()
+                    true
+                }
+                else -> return false
+            }
+        }
+
+        override fun onDestroyActionMode(mode: ActionMode) {
+            onMultiSelect = false
+            selectedTasks.clear()
+            adapter.notifyDataSetChanged()
+        }
+    }
+
+    private fun toggleSelection(task: Task, view: View) {
+        if (onMultiSelect) {
+            if (selectedTasks.contains(task.id)) {
+                selectedTasks.remove(task.id)
+                view.setBackgroundColor(task.color)
+            } else {
+                selectedTasks[task.id] = view
+                val draw = ResourcesCompat.getDrawable(resources, R.drawable.selected_task, null)
+                draw?.setColorFilter(task.color.aRGB.toInt(), PorterDuff.Mode.OVERLAY)
+                view.background = draw
+            }
+            if (selectedTasks.isEmpty()) actionMode.finish()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,11 +87,13 @@ class MainActivity
 
         adapter = TaskAdapter(object : TouchListener {
             override fun onTouch(view: View, position: Int) {
-
+                toggleSelection(adapter.tasks[position], view)
             }
 
             override fun onLongTouch(view: View, position: Int) {
-
+                if (onMultiSelect) return
+                actionMode = (view.context as Activity).startActionMode(actionModeCallback)
+                toggleSelection(adapter.tasks[position], view)
             }
         })
 
@@ -64,11 +122,6 @@ class MainActivity
             R.id.action_add_task -> {
                 val intent = Intent(this, AddTaskActivity::class.java)
                 startActivityForResult(intent, ADD_TASK_REQUEST)
-                true
-            }
-            R.id.action_color -> {
-                Log.d("menu", "test")
-                showColorDialog()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -126,12 +179,19 @@ class MainActivity
     override fun onDialogNegativeClick(dialog: DialogFragment) {}
 
     private fun showColorDialog() {
-        Log.d("menu", "test")
         val dialog = ColorDialogFragment()
         dialog.show(supportFragmentManager, "ColorDialogFragment")
     }
 
     override fun onColorSelect(color: MaterialColor) {
-
+        selectedTasks.forEach({
+            val taskId = it.key
+            val taskView = it.value
+            val draw = ResourcesCompat.getDrawable(resources, R.drawable.selected_task, null)
+            adapter.tasks.firstOrNull({ it.id == taskId })?.color = color
+            taskView.setBackgroundColor(color)
+            draw?.setColorFilter(color.aRGB.toInt(), PorterDuff.Mode.OVERLAY)
+            taskView.background = draw
+        })
     }
 }

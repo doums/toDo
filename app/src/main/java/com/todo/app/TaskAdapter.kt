@@ -1,8 +1,6 @@
 package com.todo.app
 
 
-import android.app.Activity
-import android.graphics.Color
 import android.support.v7.widget.RecyclerView
 import android.view.*
 import android.widget.CheckBox
@@ -17,8 +15,7 @@ fun View.setBackgroundColor(color: MaterialColor) {
  */
 
 class TaskAdapter(private val touchListener: TouchListener,
-                  tasks: MutableList<Task> = ArrayList(),
-                  var onMultiSelect: Boolean = false)
+                  tasks: MutableList<Task> = ArrayList())
     : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
     var tasks: MutableList<Task> = tasks
@@ -26,39 +23,6 @@ class TaskAdapter(private val touchListener: TouchListener,
             field = value
             notifyDataSetChanged()
         }
-    private var selectedItemsIds = mutableListOf<Int>()
-    private var actionMode: ActionMode? = null
-    private var actionModeCallback = object:ActionMode.Callback {
-        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-            mode.menuInflater?.inflate(R.menu.menu_context, menu)
-            onMultiSelect = true
-            return true
-        }
-
-        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-            return false
-        }
-
-        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-            val id = item.itemId
-
-            return when (id) {
-                R.id.action_delete_task -> {
-                    for (taskId in selectedItemsIds)
-                        removeTask(taskId)
-                    mode.finish()
-                    true
-                }
-                else -> return false
-            }
-        }
-
-        override fun onDestroyActionMode(mode: ActionMode) {
-            onMultiSelect = false
-            selectedItemsIds.clear()
-            notifyDataSetChanged()
-        }
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
         val context = parent.context
@@ -106,37 +70,17 @@ class TaskAdapter(private val touchListener: TouchListener,
             completedCheckBox.setOnCheckedChangeListener { _, isChecked ->
                 tasks[adapterPosition].completed = isChecked
             }
-
-            if (selectedItemsIds.contains(task.id)) view.setBackgroundColor(Color.LTGRAY)
-            else view.setBackgroundColor(task.color)
-        }
-
-        private fun toggleSelection(task: Task) {
-            if (onMultiSelect) {
-                if (selectedItemsIds.contains(task.id)) {
-                    selectedItemsIds.remove(task.id)
-                    view.setBackgroundColor(task.color)
-                } else {
-                    selectedItemsIds.add(task.id)
-                    view.setBackgroundColor(Color.LTGRAY)
-                }
-                if (selectedItemsIds.isEmpty()) actionMode?.finish()
-            }
         }
 
         override fun onClick(v: View) {
             if (adapterPosition != RecyclerView.NO_POSITION) {
                 touchListener.onTouch(v, adapterPosition)
-                toggleSelection(tasks[adapterPosition])
             }
         }
 
         override fun onLongClick(v: View): Boolean {
-            if (onMultiSelect) return true
             if (adapterPosition != RecyclerView.NO_POSITION) {
                 touchListener.onLongTouch(v, adapterPosition)
-                actionMode = (v.context as Activity).startActionMode(actionModeCallback)
-                toggleSelection(tasks[adapterPosition])
             }
             return true
         }

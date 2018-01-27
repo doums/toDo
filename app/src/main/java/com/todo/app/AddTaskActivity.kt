@@ -20,6 +20,10 @@ class AddTaskActivity : AppCompatActivity(), ColorDialogFragment.ColorDialogList
         setContentView(R.layout.activity_add_task)
         val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
         setSupportActionBar(toolbar)
+        // Get a support ActionBar corresponding to this toolbar
+        val ab = supportActionBar
+        // Enable the Up button
+        ab!!.setDisplayHomeAsUpEnabled(true)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
