@@ -9,11 +9,17 @@ import android.os.Bundle
 import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.*
+import android.util.Log
 import android.view.ActionMode
 import android.view.View
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.CheckBox
+import android.os.Parcelable
+
+
+
+
 
 
 class MainActivity
@@ -25,12 +31,18 @@ class MainActivity
     private lateinit var adapter: TaskAdapter
     private var selectedTasks = mutableMapOf<Int, View>()
     private lateinit var actionMode: ActionMode
-    var onMultiSelect: Boolean = false
+    private lateinit var recyclerView: RecyclerView
+    var onSelect: Boolean = false
+
+    companion object {
+        private const val ADD_TASK_REQUEST = 0
+        private const val SAVED_ACTION_MODE = "saved action mode"
+    }
 
     private var actionModeCallback = object:ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             mode.menuInflater?.inflate(R.menu.menu_context, menu)
-            onMultiSelect = true
+            onSelect = true
             return true
         }
 
@@ -57,24 +69,9 @@ class MainActivity
         }
 
         override fun onDestroyActionMode(mode: ActionMode) {
-            onMultiSelect = false
+            onSelect = false
             selectedTasks.clear()
             adapter.notifyDataSetChanged()
-        }
-    }
-
-    private fun toggleSelection(task: Task, view: View) {
-        if (onMultiSelect) {
-            if (selectedTasks.contains(task.id)) {
-                selectedTasks.remove(task.id)
-                view.setBackgroundColor(task.color)
-            } else {
-                selectedTasks[task.id] = view
-                val draw = ResourcesCompat.getDrawable(resources, R.drawable.selected_task, null)
-                draw?.setColorFilter(task.color.aRGB.toInt(), PorterDuff.Mode.OVERLAY)
-                view.background = draw
-            }
-            if (selectedTasks.isEmpty()) actionMode.finish()
         }
     }
 
@@ -87,7 +84,7 @@ class MainActivity
 
         adapter = TaskAdapter(object : TouchListener {
             override fun onTouch(view: View, position: Int) {
-                if (!onMultiSelect) {
+                if (!onSelect) {
                     val completedCheckBox = view.findViewById(R.id.task_completed) as CheckBox
                     completedCheckBox.isChecked = !completedCheckBox.isChecked
                 }
@@ -95,15 +92,47 @@ class MainActivity
             }
 
             override fun onLongTouch(view: View, position: Int) {
-                if (onMultiSelect) return
-                actionMode = (view.context as Activity).startActionMode(actionModeCallback)
+                if (onSelect) return
+                actionMode = startActionMode(actionModeCallback)
                 toggleSelection(adapter.tasks[position], view)
             }
         })
 
-        val recyclerView = findViewById<RecyclerView>(R.id.task_list)
+        recyclerView = findViewById(R.id.task_list)
         recyclerView.layoutManager = getLayoutManager()
         recyclerView.adapter = adapter
+        Log.d("test", "onCreate")
+    }
+
+    override fun onSaveInstanceState(savedInstanceState: Bundle ) {
+        super.onSaveInstanceState(savedInstanceState)
+        val listState = recyclerView.layoutManager.onSaveInstanceState()
+        savedInstanceState.putBoolean(SAVED_ACTION_MODE,  onSelect)
+        savedInstanceState.putParcelable("test", listState)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        if (savedInstanceState.getBoolean(SAVED_ACTION_MODE)) {
+            actionMode = startActionMode(actionModeCallback)
+        }
+        if (savedInstanceState.getParcelable<Parcelable>("test") != null)
+            Log.d("test", "onRestore")
+    }
+
+    private fun toggleSelection(task: Task, view: View) {
+        if (onSelect) {
+            if (selectedTasks.contains(task.id)) {
+                selectedTasks.remove(task.id)
+                view.setBackgroundColor(task.color)
+            } else {
+                selectedTasks[task.id] = view
+                val draw = ResourcesCompat.getDrawable(resources, R.drawable.selected_task, null)
+                draw?.setColorFilter(task.color.aRGB.toInt(), PorterDuff.Mode.OVERLAY)
+                view.background = draw
+            }
+            if (selectedTasks.isEmpty()) actionMode.finish()
+        }
     }
 
     private fun getLayoutManager():  StaggeredGridLayoutManager{
@@ -170,10 +199,6 @@ class MainActivity
         super.onPause()
 
         Storage.writeData(this, adapter.tasks)
-    }
-
-    companion object {
-        private const val ADD_TASK_REQUEST = 0
     }
 
     private fun showClearDialog() {

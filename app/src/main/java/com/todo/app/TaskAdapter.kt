@@ -15,8 +15,7 @@ fun View.setBackgroundColor(color: MaterialColor) {
  * Created by pierre on 21/01/18.
  */
 
-class TaskAdapter(private val touchListener: TouchListener,
-                  tasks: MutableList<Task> = ArrayList())
+class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<Task> = ArrayList())
     : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
     var tasks: MutableList<Task> = tasks
