@@ -13,4 +13,5 @@
     <color name="blackHint">#373737</color>
     <color name="select_border">#78000000</color>
     <color name="select_fill">#32000000</color>
+    <color name="action_mode_color">#33691e</color>
 </resources>

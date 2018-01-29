@@ -2,18 +2,19 @@ package com.todo.app
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.PorterDuff
+import android.media.VolumeShaper
 import android.support.v4.app.DialogFragment
 import android.os.Bundle
 import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.Toolbar
+import android.support.v7.widget.*
 import android.view.ActionMode
 import android.view.View
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.CheckBox
 
 
 class MainActivity
@@ -87,6 +88,10 @@ class MainActivity
 
         adapter = TaskAdapter(object : TouchListener {
             override fun onTouch(view: View, position: Int) {
+                if (!onMultiSelect) {
+                    val completedCheckBox = view.findViewById(R.id.task_completed) as CheckBox
+                    completedCheckBox.isChecked = !completedCheckBox.isChecked
+                }
                 toggleSelection(adapter.tasks[position], view)
             }
 
@@ -98,8 +103,15 @@ class MainActivity
         })
 
         val recyclerView = findViewById<RecyclerView>(R.id.task_list)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.layoutManager = getLayoutManager()
         recyclerView.adapter = adapter
+    }
+
+    private fun getLayoutManager():  StaggeredGridLayoutManager{
+        return if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+            StaggeredGridLayoutManager(3, 1)
+        else
+            StaggeredGridLayoutManager(2, 1)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
