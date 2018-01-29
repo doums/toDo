@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.PorterDuff
-import android.media.VolumeShaper
 import android.support.v4.app.DialogFragment
 import android.os.Bundle
 import android.support.v4.content.res.ResourcesCompat

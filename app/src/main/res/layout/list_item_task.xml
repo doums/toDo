@@ -25,7 +25,8 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentBottom="false"
             android:layout_alignParentStart="true"
-            android:layout_toStartOf="@+id/task_completed" />
+            android:layout_toStartOf="@+id/task_completed"
+            android:fontFamily="@font/roboto_slab"/>
 
         <CheckBox
             android:id="@+id/task_completed"
