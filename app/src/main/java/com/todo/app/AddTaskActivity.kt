@@ -5,6 +5,7 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -66,5 +67,18 @@ class AddTaskActivity : AppCompatActivity(), ColorDialogFragment.ColorDialogList
         val view = findViewById(R.id.task_activity) as? View
         view?.setBackgroundColor(color)
         task.color = color
+    }
+
+    override fun onSaveInstanceState(savedInstanceState: Bundle ) {
+        super.onSaveInstanceState(savedInstanceState)
+        savedInstanceState.putSerializable("color",  task.color)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        val color = savedInstanceState.getSerializable("color") as MaterialColor
+        task.color = color
+        val view = findViewById(R.id.task_activity) as? View
+        view?.setBackgroundColor(color)
     }
 }
