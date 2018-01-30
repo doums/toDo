@@ -15,12 +15,6 @@ import android.view.View
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.CheckBox
-import android.os.Parcelable
-
-
-
-
-
 
 class MainActivity
     :
@@ -29,7 +23,6 @@ class MainActivity
         ColorDialogFragment.ColorDialogListener
 {
     private lateinit var adapter: TaskAdapter
-    private var selectedTasks = mutableMapOf<Int, View>()
     private lateinit var actionMode: ActionMode
     private lateinit var recyclerView: RecyclerView
     var onSelect: Boolean = false
@@ -55,8 +48,7 @@ class MainActivity
 
             return when (id) {
                 R.id.action_delete_task -> {
-                    for (task in selectedTasks)
-                        adapter.removeTask(task.key)
+                    adapter.removeSelectedTask()
                     mode.finish()
                     true
                 }
@@ -70,8 +62,9 @@ class MainActivity
 
         override fun onDestroyActionMode(mode: ActionMode) {
             onSelect = false
-            selectedTasks.clear()
+            adapter.deselectTasks()
             adapter.notifyDataSetChanged()
+            Log.d("test", "onDestroyActionMode")
         }
     }
 
@@ -85,10 +78,14 @@ class MainActivity
         adapter = TaskAdapter(object : TouchListener {
             override fun onTouch(view: View, position: Int) {
                 if (!onSelect) {
+                    Log.d("test", "check")
                     val completedCheckBox = view.findViewById(R.id.task_completed) as CheckBox
                     completedCheckBox.isChecked = !completedCheckBox.isChecked
                 }
-                toggleSelection(adapter.tasks[position], view)
+                else {
+                    Log.d("test", "toggleSelection")
+                    toggleSelection(adapter.tasks[position], view)
+                }
             }
 
             override fun onLongTouch(view: View, position: Int) {
@@ -106,9 +103,7 @@ class MainActivity
 
     override fun onSaveInstanceState(savedInstanceState: Bundle ) {
         super.onSaveInstanceState(savedInstanceState)
-        val listState = recyclerView.layoutManager.onSaveInstanceState()
         savedInstanceState.putBoolean(SAVED_ACTION_MODE,  onSelect)
-        savedInstanceState.putParcelable("test", listState)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -116,23 +111,19 @@ class MainActivity
         if (savedInstanceState.getBoolean(SAVED_ACTION_MODE)) {
             actionMode = startActionMode(actionModeCallback)
         }
-        if (savedInstanceState.getParcelable<Parcelable>("test") != null)
-            Log.d("test", "onRestore")
     }
 
     private fun toggleSelection(task: Task, view: View) {
-        if (onSelect) {
-            if (selectedTasks.contains(task.id)) {
-                selectedTasks.remove(task.id)
-                view.setBackgroundColor(task.color)
-            } else {
-                selectedTasks[task.id] = view
-                val draw = ResourcesCompat.getDrawable(resources, R.drawable.selected_task, null)
-                draw?.setColorFilter(task.color.aRGB.toInt(), PorterDuff.Mode.OVERLAY)
-                view.background = draw
-            }
-            if (selectedTasks.isEmpty()) actionMode.finish()
+        if (task.selected) {
+            task.selected = false
+            view.setBackgroundColor(task.color)
+        } else {
+            task.selected = true
+            val draw = ResourcesCompat.getDrawable(resources, R.drawable.selected_task, null)
+            draw?.setColorFilter(task.color.aRGB.toInt(), PorterDuff.Mode.OVERLAY)
+            view.background = draw
         }
+        if (!adapter.isSelectingMode()) actionMode.finish()
     }
 
     private fun getLayoutManager():  StaggeredGridLayoutManager{
@@ -156,7 +147,8 @@ class MainActivity
 
         return when (id) {
             R.id.action_clear -> {
-                showClearDialog()
+                if (!adapter.tasks.isEmpty())
+                    showClearDialog()
                 true
             }
             R.id.action_add_task -> {
@@ -220,14 +212,15 @@ class MainActivity
     }
 
     override fun onColorSelect(color: MaterialColor) {
-        selectedTasks.forEach({
-            val taskId = it.key
-            val taskView = it.value
-            val draw = ResourcesCompat.getDrawable(resources, R.drawable.selected_task, null)
-            adapter.tasks.firstOrNull({ it.id == taskId })?.color = color
-            taskView.setBackgroundColor(color)
-            draw?.setColorFilter(color.aRGB.toInt(), PorterDuff.Mode.OVERLAY)
-            taskView.background = draw
-        })
+        adapter.tasks
+                .filter { it.selected }
+                .forEach {
+                    val draw = ResourcesCompat.getDrawable(resources, R.drawable.selected_task, null)
+                    it.color = color
+                    val taskView = recyclerView.layoutManager.findViewByPosition(it.position)
+                    taskView.setBackgroundColor(color)
+                    draw?.setColorFilter(color.aRGB.toInt(), PorterDuff.Mode.OVERLAY)
+                    taskView.background = draw
+                }
     }
 }

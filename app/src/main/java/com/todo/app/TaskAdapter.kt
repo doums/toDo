@@ -1,6 +1,9 @@
 package com.todo.app
 
 
+import android.content.res.Resources
+import android.graphics.PorterDuff
+import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.*
@@ -43,13 +46,23 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
         notifyDataSetChanged()
     }
 
-    fun removeTask(id: Int) {
-        tasks.remove(tasks.firstOrNull{it.id == id})
-    }
-
     fun clearTasks() {
         tasks.clear()
         notifyDataSetChanged()
+    }
+
+    fun deselectTasks() {
+        tasks
+                .filter { it.selected }
+                .forEach { it.selected = false }
+    }
+
+    fun removeSelectedTask() {
+        tasks.removeIf { it.selected }
+    }
+
+    fun isSelectingMode(): Boolean {
+        return tasks.any { it.selected }
     }
 
     inner class TaskViewHolder(private var view: View) : RecyclerView.ViewHolder(view), View.OnLongClickListener, View.OnClickListener {
@@ -65,7 +78,13 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
         fun bindTask(task: Task) {
             descriptionTextView.text = task.description
             completedCheckBox.isChecked = task.completed
+            task.position = adapterPosition
             view.setBackgroundColor(task.color)
+            if (task.selected) {
+                val draw = ResourcesCompat.getDrawable(view.resources, R.drawable.selected_task, null)
+                draw?.setColorFilter(task.color.aRGB.toInt(), PorterDuff.Mode.OVERLAY)
+                view.background = draw
+            }
 
             completedCheckBox.setOnCheckedChangeListener { _, isChecked ->
                 tasks[adapterPosition].completed = isChecked
