@@ -8,7 +8,7 @@
     <string name="action_delete_task">delete</string>
     <string name="action_clear">Clear</string>
     <string name="cancel">Cancel</string>
-    <string name="confirm">OK</string>
+    <string name="confirm">Yes</string>
     <string name="dialog_clear">Are you sure?</string>
     <string name="action_color">Color</string>
 </resources>

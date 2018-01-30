@@ -24,6 +24,7 @@ object Storage {
             fos = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE)
             oos = ObjectOutputStream(fos)
             oos.writeObject(tasks)
+            Log.d("test", "write in local storage")
         } catch (e: Exception) {
             Log.e(LOG_TAG, "Could not write to file.")
             e.printStackTrace()
@@ -51,6 +52,7 @@ object Storage {
             ois = ObjectInputStream(fis)
 
             tasks = ois.readObject() as? MutableList<Task>
+            Log.d("test", "read in local storage")
         } catch (e: Exception) {
             Log.e(LOG_TAG, "Could not read from file.")
             e.printStackTrace()

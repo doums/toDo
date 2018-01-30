@@ -1,7 +1,5 @@
 package com.todo.app
 
-
-import android.content.res.Resources
 import android.graphics.PorterDuff
 import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.widget.RecyclerView
@@ -42,11 +40,13 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
     }
 
     fun addTask(task: Task) {
+        Log.d("test", "addTask")
         tasks.add(0, task)
         notifyDataSetChanged()
     }
 
     fun clearTasks() {
+        Log.d("test", "clearTasks")
         tasks.clear()
         notifyDataSetChanged()
     }
@@ -58,6 +58,7 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
     }
 
     fun removeSelectedTask() {
+        Log.d("test", "removeSelectedTask")
         tasks.removeIf { it.selected }
     }
 

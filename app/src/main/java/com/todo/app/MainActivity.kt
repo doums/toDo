@@ -15,6 +15,7 @@ import android.view.View
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.CheckBox
+import java.io.Serializable
 
 class MainActivity
     :
@@ -29,6 +30,7 @@ class MainActivity
 
     companion object {
         private const val ADD_TASK_REQUEST = 0
+        private const val SAVED_TASKS = "saved tasks"
         private const val SAVED_ACTION_MODE = "saved action mode"
     }
 
@@ -104,6 +106,8 @@ class MainActivity
     override fun onSaveInstanceState(savedInstanceState: Bundle ) {
         super.onSaveInstanceState(savedInstanceState)
         savedInstanceState.putBoolean(SAVED_ACTION_MODE,  onSelect)
+        savedInstanceState.putSerializable(SAVED_TASKS, adapter.tasks as Serializable)
+        Log.d("test", "onSaveInstanceState")
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -111,6 +115,10 @@ class MainActivity
         if (savedInstanceState.getBoolean(SAVED_ACTION_MODE)) {
             actionMode = startActionMode(actionModeCallback)
         }
+        val tasks = savedInstanceState.getSerializable(SAVED_TASKS)
+        if (tasks != null)
+            adapter.tasks = tasks as MutableList<Task>
+        Log.d("test", "onRestoreInstanceState")
     }
 
     private fun toggleSelection(task: Task, view: View) {
@@ -153,6 +161,7 @@ class MainActivity
             }
             R.id.action_add_task -> {
                 val intent = Intent(this, AddTaskActivity::class.java)
+                Log.d("test", "start add task activity")
                 startActivityForResult(intent, ADD_TASK_REQUEST)
                 true
             }
@@ -162,6 +171,7 @@ class MainActivity
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Log.d("test", "on add task activity result")
         if (requestCode == ADD_TASK_REQUEST && resultCode == Activity.RESULT_OK) {
             val task = data?.getSerializableExtra("Task") as Task
             if (!task.description.isEmpty()) {
@@ -178,17 +188,21 @@ class MainActivity
 
     override fun onResume() {
         super.onResume()
+        Log.d("test", "onResume")
 
         val tasks = Storage.readData(this)
+
 
         // We only want to set the tasks if the list is already empty.
         if (tasks != null && adapter.tasks.isEmpty()) {
             adapter.tasks = tasks
+            Log.d("test", "resume tasks from local storage")
         }
     }
 
     override fun onPause() {
         super.onPause()
+        Log.d("test", "onPause")
 
         Storage.writeData(this, adapter.tasks)
     }
