@@ -64,7 +64,7 @@ class AddTaskActivity : AppCompatActivity(), ColorDialogFragment.ColorDialogList
 
     override fun onColorSelect(color: MaterialColor) {
         val view = findViewById(R.id.task_activity) as? View
-        view?.setBackgroundColor(color)
+        view?.setBackgroundColor(color.aRGB.toInt())
         task.color = color
     }
 
@@ -78,6 +78,6 @@ class AddTaskActivity : AppCompatActivity(), ColorDialogFragment.ColorDialogList
         val color = savedInstanceState.getSerializable("color") as MaterialColor
         task.color = color
         val view = findViewById(R.id.task_activity) as? View
-        view?.setBackgroundColor(color)
+        view?.setBackgroundColor(color.aRGB.toInt())
     }
 }

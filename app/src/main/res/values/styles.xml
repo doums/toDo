@@ -10,7 +10,7 @@
 
     <!-- Main activity background -->
     <style name="MainActivityBg">
-        <item name="android:background">@color/orangeLight</item>
+        <item name="android:background">@color/greyBg</item>
     </style>
 
     <!-- AddTask activity theme -->

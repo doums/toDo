@@ -1,15 +1,21 @@
 package com.todo.app
 
-import android.graphics.PorterDuff
-import android.support.v4.content.res.ResourcesCompat
+import android.support.v7.widget.CardView
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.*
 import android.widget.CheckBox
 import android.widget.TextView
 
-fun View.setBackgroundColor(color: MaterialColor) {
-    this.setBackgroundColor(color.aRGB.toInt())
+fun View.setBackgroundColor(task: Task) {
+    if (task.selected) {
+        (this as CardView).setCardBackgroundColor(MaterialColor.Grey.aRGB.toInt())
+        this.cardElevation = Converter.convertDpToPx(8F).toFloat()
+    }
+    else  {
+        (this as CardView).setCardBackgroundColor(task.color.aRGB.toInt())
+        this.cardElevation = Converter.convertDpToPx(2F).toFloat()
+    }
 }
 
 /**
@@ -77,16 +83,11 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
         }
 
         fun bindTask(task: Task) {
+            Log.d("test", "bindTask")
             descriptionTextView.text = task.description
             completedCheckBox.isChecked = task.completed
             task.position = adapterPosition
-            view.setBackgroundColor(task.color)
-            if (task.selected) {
-                val draw = ResourcesCompat.getDrawable(view.resources, R.drawable.selected_task, null)
-                draw?.setColorFilter(task.color.aRGB.toInt(), PorterDuff.Mode.OVERLAY)
-                view.background = draw
-            }
-
+            view.setBackgroundColor(task)
             completedCheckBox.setOnCheckedChangeListener { _, isChecked ->
                 tasks[adapterPosition].completed = isChecked
             }

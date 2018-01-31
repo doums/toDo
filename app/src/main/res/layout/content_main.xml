@@ -9,14 +9,15 @@
     tools:showIn="@layout/activity_main"
     tools:context="com.todo.app.MainActivity">
 
-<android.support.v7.widget.RecyclerView
-    android:id="@+id/task_list"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingEnd="5dp"
-    android:paddingStart="5dp"
-    android:paddingBottom="5dp"
-    android:paddingTop="8dp"
-    android:clipToPadding="false"/>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/task_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingEnd="3dp"
+        android:paddingStart="3dp"
+        android:paddingBottom="3dp"
+        android:paddingTop="5dp"
+        android:clipToPadding="false"
+        />
 
 </android.support.constraint.ConstraintLayout>
