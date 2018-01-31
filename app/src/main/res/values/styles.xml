@@ -1,24 +1,22 @@
 <resources>
 
     <!-- Main activity theme -->
-    <style name="MainActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="activityTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="windowActionModeOverlay">true</item>
-        <item name="colorPrimary">@color/orangePrimary</item>
-        <item name="colorPrimaryDark">@color/orangePrimaryDark</item>
-        <item name="colorAccent">@color/orangeLight</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primaryDark</item>
+        <item name="colorAccent">@color/secondary</item>
+    </style>
+
+    <!-- Dialog theme -->
+    <style name="dialogTheme" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="android:background">@color/background</item>
+        <item name="colorAccent">@color/secondary</item>
     </style>
 
     <!-- Main activity background -->
     <style name="MainActivityBg">
-        <item name="android:background">@color/greyBg</item>
-    </style>
-
-    <!-- AddTask activity theme -->
-    <style name="AddTaskActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="windowActionModeOverlay">true</item>
-        <item name="colorPrimary">@color/brownPrimary</item>
-        <item name="colorPrimaryDark">@color/brownPrimaryDark</item>
-        <item name="colorAccent">@color/brownLight</item>
+        <item name="android:background">@color/background</item>
     </style>
 
     <!-- Toolbar -->
@@ -28,7 +26,7 @@
     </style>
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat" />
     <style name="AppTheme.ActionMode" parent="@style/Widget.AppCompat.ActionMode">
-        <item name="background">@color/orangePrimary</item>
+        <item name="background">@color/primary</item>
     </style>
 
     <!-- The EditText for add task -->
@@ -36,12 +34,17 @@
         <item name="android:background">@null</item>
         <item name="android:padding">10dp</item>
         <item name="android:textColor">@color/black</item>
-        <item name="android:textColorHint">@color/blackHint</item>
+        <item name="android:textColorHint">@color/hintText</item>
     </style>
 
     <!-- AddTask activity background -->
     <style name="AddTaskActivityBg">
-        <item name="android:background">@color/greyBg</item>
+        <item name="android:background">@color/grey</item>
+    </style>
+
+    <!-- checkbox of task view -->
+    <style name="checkBoxTheme">
+        <item name="colorAccent">@color/background</item>
     </style>
 
 </resources>

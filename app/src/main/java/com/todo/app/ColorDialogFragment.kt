@@ -26,7 +26,7 @@ class ColorDialogFragment : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val colorList: MutableList<String> = mutableListOf()
         enumValues<MaterialColor>().forEach { colorList.add(it.colorName) }
-        val builder = AlertDialog.Builder(activity)
+        val builder = AlertDialog.Builder(activity, R.style.dialogTheme)
                 .setItems(colorList.toTypedArray(), { _, which ->
                     var selectedColor = enumValues<MaterialColor>()
                             .firstOrNull({ color -> color.colorName == colorList[which] })

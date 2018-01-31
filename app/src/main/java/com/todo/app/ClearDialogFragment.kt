@@ -30,7 +30,7 @@ class ClearDialogFragment : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         // Build the dialog and set up the button click handlers
-        val builder = AlertDialog.Builder(activity)
+        val builder = AlertDialog.Builder(activity, R.style.dialogTheme)
         builder.setMessage(R.string.dialog_clear)
                 .setPositiveButton(R.string.confirm, { _, _ ->
                     // Send the positive button event back to the host activity

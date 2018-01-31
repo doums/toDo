@@ -39,7 +39,9 @@
             android:focusable="false"
             android:background="#00ffffff"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"/> <!-- to remove the default ripple effect -->
+            android:layout_alignParentBottom="true"
+            android:theme="@style/checkBoxTheme"
+            /> <!-- to remove the default ripple effect -->
 
     </RelativeLayout>
 
