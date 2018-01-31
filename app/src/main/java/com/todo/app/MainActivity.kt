@@ -21,11 +21,12 @@ class MainActivity
     private lateinit var adapter: TaskAdapter
     private var actionMode: ActionMode? = null
     private lateinit var recyclerView: RecyclerView
-    private var selectedTask: MutableMap<Int, View> = mutableMapOf()
+    private var selectedTasksPosition: MutableList<Int> = mutableListOf()
 
     companion object {
         private const val ADD_TASK_REQUEST = 0
-        private const val SAVED_TASKS = "saved tasks"
+        private const val TASKS = "saved tasks"
+        private const val SELECTED_POSITIONS = "saved selected tasks"
     }
 
     private var actionModeCallback = object:ActionMode.Callback {
@@ -43,7 +44,8 @@ class MainActivity
 
             return when (id) {
                 R.id.action_delete_task -> {
-                    adapter.removeSelectedTask()
+                    selectedTasksPosition.forEach {adapter.removeTask(it)}
+                    selectedTasksPosition.clear()
                     mode.finish()
                     true
                 }
@@ -56,7 +58,10 @@ class MainActivity
         }
 
         override fun onDestroyActionMode(mode: ActionMode) {
-            adapter.deselectTasks()
+            selectedTasksPosition.forEach {
+                adapter.notifyItemChanged(it)
+            }
+            selectedTasksPosition.clear()
             Log.d("test", "onDestroyActionMode")
         }
     }
@@ -71,21 +76,21 @@ class MainActivity
 
         adapter = TaskAdapter(object : TouchListener {
             override fun onTouch(view: View, position: Int) {
-                if (!adapter.isSelectingMode()) {
+                if (selectedTasksPosition.isEmpty()) {
                     Log.d("test", "check")
                     val completedCheckBox = view.findViewById(R.id.task_completed) as CheckBox
                     completedCheckBox.isChecked = !completedCheckBox.isChecked
                 }
                 else {
                     Log.d("test", "toggleSelection")
-                    toggleSelection(adapter.tasks[position], view)
+                    toggleSelection(view, position)
                 }
             }
 
             override fun onLongTouch(view: View, position: Int) {
-                if (adapter.isSelectingMode()) return
+                if (!selectedTasksPosition.isEmpty()) return
                 actionMode = startActionMode(actionModeCallback)
-                toggleSelection(adapter.tasks[position], view)
+                toggleSelection(view, position)
             }
         })
 
@@ -95,24 +100,50 @@ class MainActivity
         Log.d("test", "onCreate")
     }
 
+    override fun onPause() {
+        super.onPause()
+        Log.d("test", "onPause")
+        Storage.writeData(this, adapter.tasks)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("test", "onResume")
+        val tasks = Storage.readData(this)
+
+        // We only want to set the tasks if the list is already empty.
+        if (tasks != null && adapter.tasks.isEmpty()) {
+            adapter.tasks = tasks
+            Log.d("test", "resume tasks from local storage")
+        }
+    }
+
     override fun onSaveInstanceState(savedInstanceState: Bundle ) {
         super.onSaveInstanceState(savedInstanceState)
-        savedInstanceState.putSerializable(SAVED_TASKS, adapter.tasks as Serializable)
+        savedInstanceState.putSerializable(TASKS, adapter.tasks as Serializable)
+        savedInstanceState.putSerializable(SELECTED_POSITIONS, selectedTasksPosition as Serializable)
         Log.d("test", "onSaveInstanceState")
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        Log.d("test", "onRestoreInstanceState")
         super.onRestoreInstanceState(savedInstanceState)
-        val tasks = savedInstanceState.getSerializable(SAVED_TASKS)
+        val tasks = savedInstanceState.getSerializable(TASKS)
+        val selected = savedInstanceState.getSerializable(SELECTED_POSITIONS)
         if (tasks != null)
             adapter.tasks = tasks as MutableList<Task>
-        Log.d("test", "onRestoreInstanceState")
     }
 
-    private fun toggleSelection(task: Task, view: View) {
-        task.selected = !task.selected
-        view.setBackgroundColor(task)
-        if (!adapter.isSelectingMode()) actionMode?.finish()
+    private fun toggleSelection(view: View, position: Int) {
+        if (selectedTasksPosition.any({it == position})) {
+            view.setCardStyle(adapter.tasks[position].color.aRGB.toInt(), false)
+            selectedTasksPosition.remove(position)
+        }
+        else {
+            selectedTasksPosition.add(position)
+            view.setCardStyle(MaterialColor.Grey.aRGB.toInt(),true)
+        }
+        if (selectedTasksPosition.isEmpty()) actionMode?.finish()
     }
 
     private fun getLayoutManager():  StaggeredGridLayoutManager{
@@ -168,29 +199,6 @@ class MainActivity
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        Log.d("test", "onResume")
-
-        val tasks = Storage.readData(this)
-
-
-        // We only want to set the tasks if the list is already empty.
-        if (tasks != null && adapter.tasks.isEmpty()) {
-            adapter.tasks = tasks
-            Log.d("test", "resume tasks from local storage")
-        }
-        if (adapter.isSelectingMode()) {
-            actionMode = startActionMode(actionModeCallback)
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d("test", "onPause")
-        Storage.writeData(this, adapter.tasks)
-    }
-
     private fun showClearDialog() {
         // Create an instance of the dialog fragment and show it
         val dialog = ClearDialogFragment()
@@ -210,10 +218,12 @@ class MainActivity
     }
 
     override fun onColorSelect(color: MaterialColor) {
-        adapter.tasks
-                .filter { it.selected }
-                .forEach { it.color = color }
-        adapter.deselectTasks()
+        selectedTasksPosition
+                .forEach {
+                    adapter.tasks[it].color = color
+                    adapter.notifyItemChanged(it)
+                }
+        selectedTasksPosition.clear()
         actionMode?.finish()
     }
 }

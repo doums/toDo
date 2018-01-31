@@ -7,13 +7,12 @@ import android.view.*
 import android.widget.CheckBox
 import android.widget.TextView
 
-fun View.setBackgroundColor(task: Task) {
-    if (task.selected) {
-        (this as CardView).setCardBackgroundColor(MaterialColor.Grey.aRGB.toInt())
+fun View.setCardStyle(color: Int = MaterialColor.Grey.aRGB.toInt(), pickedUp: Boolean = false) {
+    (this as CardView).setCardBackgroundColor(color)
+    if (pickedUp) {
         this.cardElevation = Converter.convertDpToPx(8F).toFloat()
     }
     else  {
-        (this as CardView).setCardBackgroundColor(task.color.aRGB.toInt())
         this.cardElevation = Converter.convertDpToPx(2F).toFloat()
     }
 }
@@ -57,28 +56,9 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
         notifyDataSetChanged()
     }
 
-    fun deselectTasks() {
-        tasks
-                .filter { it.selected }
-                .forEach {
-                    it.selected = false
-                    notifyItemChanged(it.position)
-                }
-    }
-
-    fun removeSelectedTask() {
-        Log.d("test", "removeSelectedTask")
-        tasks
-                .filter { it.selected }
-                .forEach({
-                    val position = it.position
-                    tasks.remove(it)
-                    notifyItemRemoved(position)
-                })
-    }
-
-    fun isSelectingMode(): Boolean {
-        return tasks.any { it.selected }
+    fun removeTask(position: Int) {
+        tasks.removeAt(position)
+        notifyItemRemoved(position)
     }
 
     inner class TaskViewHolder(private var view: View) : RecyclerView.ViewHolder(view), View.OnLongClickListener, View.OnClickListener {
@@ -95,19 +75,15 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
             Log.d("viewHolder", "bindTask")
             descriptionTextView.text = task.description
             completedCheckBox.isChecked = task.completed
-            task.position = adapterPosition
-            view.setBackgroundColor(task)
+            view.setCardStyle(task.color.aRGB.toInt())
             completedCheckBox.setOnCheckedChangeListener { _, isChecked ->
                 tasks[adapterPosition].completed = isChecked
-
             }
         }
 
         override fun onClick(v: View) {
             if (adapterPosition != RecyclerView.NO_POSITION) {
                 touchListener.onTouch(v, adapterPosition)
-                Log.d("test", "layout "+layoutPosition)
-                Log.d("test", "adapter "+adapterPosition)
             }
         }
 

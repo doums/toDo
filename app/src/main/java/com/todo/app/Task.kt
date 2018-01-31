@@ -8,9 +8,7 @@ import java.io.Serializable
 
 data class Task(
         var id: Int = 0,
-        var position: Int = -1,
         var description: String = "",
         var completed: Boolean = false,
-        var color: MaterialColor = MaterialColor.Grey,
-        var selected: Boolean = false
+        var color: MaterialColor = MaterialColor.Grey
 ) : Serializable
