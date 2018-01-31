@@ -45,10 +45,10 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
         holder?.bindTask(tasks[position])
     }
 
-    fun addTask(task: Task) {
+    fun addTask(task: Task, position: Int) {
         Log.d("test", "addTask")
-        tasks.add(0, task)
-        notifyDataSetChanged()
+        tasks.add(position, task)
+        notifyItemInserted(position)
     }
 
     fun clearTasks() {
@@ -60,12 +60,21 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
     fun deselectTasks() {
         tasks
                 .filter { it.selected }
-                .forEach { it.selected = false }
+                .forEach {
+                    it.selected = false
+                    notifyItemChanged(it.position)
+                }
     }
 
     fun removeSelectedTask() {
         Log.d("test", "removeSelectedTask")
-        tasks.removeIf { it.selected }
+        tasks
+                .filter { it.selected }
+                .forEach({
+                    val position = it.position
+                    tasks.remove(it)
+                    notifyItemRemoved(position)
+                })
     }
 
     fun isSelectingMode(): Boolean {
@@ -83,19 +92,22 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
         }
 
         fun bindTask(task: Task) {
-            Log.d("test", "bindTask")
+            Log.d("viewHolder", "bindTask")
             descriptionTextView.text = task.description
             completedCheckBox.isChecked = task.completed
             task.position = adapterPosition
             view.setBackgroundColor(task)
             completedCheckBox.setOnCheckedChangeListener { _, isChecked ->
                 tasks[adapterPosition].completed = isChecked
+
             }
         }
 
         override fun onClick(v: View) {
             if (adapterPosition != RecyclerView.NO_POSITION) {
                 touchListener.onTouch(v, adapterPosition)
+                Log.d("test", "layout "+layoutPosition)
+                Log.d("test", "adapter "+adapterPosition)
             }
         }
 

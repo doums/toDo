@@ -21,11 +21,11 @@ class MainActivity
     private lateinit var adapter: TaskAdapter
     private var actionMode: ActionMode? = null
     private lateinit var recyclerView: RecyclerView
+    private var selectedTask: MutableMap<Int, View> = mutableMapOf()
 
     companion object {
         private const val ADD_TASK_REQUEST = 0
         private const val SAVED_TASKS = "saved tasks"
-        private const val SAVED_ACTION_MODE = "saved action mode"
     }
 
     private var actionModeCallback = object:ActionMode.Callback {
@@ -57,7 +57,6 @@ class MainActivity
 
         override fun onDestroyActionMode(mode: ActionMode) {
             adapter.deselectTasks()
-            adapter.notifyDataSetChanged()
             Log.d("test", "onDestroyActionMode")
         }
     }
@@ -98,16 +97,12 @@ class MainActivity
 
     override fun onSaveInstanceState(savedInstanceState: Bundle ) {
         super.onSaveInstanceState(savedInstanceState)
-        savedInstanceState.putBoolean(SAVED_ACTION_MODE, adapter.isSelectingMode())
         savedInstanceState.putSerializable(SAVED_TASKS, adapter.tasks as Serializable)
         Log.d("test", "onSaveInstanceState")
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        if (savedInstanceState.getBoolean(SAVED_ACTION_MODE)) {
-            actionMode = startActionMode(actionModeCallback)
-        }
         val tasks = savedInstanceState.getSerializable(SAVED_TASKS)
         if (tasks != null)
             adapter.tasks = tasks as MutableList<Task>
@@ -167,7 +162,8 @@ class MainActivity
                         .filter { it.id > nb }
                         .forEach { nb = it.id }
                 task.id = nb + 1
-                adapter.addTask(task)
+                adapter.addTask(task, 0)
+                recyclerView.scrollToPosition(0)
             }
         }
     }
@@ -184,12 +180,14 @@ class MainActivity
             adapter.tasks = tasks
             Log.d("test", "resume tasks from local storage")
         }
+        if (adapter.isSelectingMode()) {
+            actionMode = startActionMode(actionModeCallback)
+        }
     }
 
     override fun onPause() {
         super.onPause()
         Log.d("test", "onPause")
-
         Storage.writeData(this, adapter.tasks)
     }
 
@@ -214,11 +212,7 @@ class MainActivity
     override fun onColorSelect(color: MaterialColor) {
         adapter.tasks
                 .filter { it.selected }
-                .forEach {
-                    it.color = color
-                    val taskView = recyclerView.layoutManager.findViewByPosition(it.position)
-                    taskView.setBackgroundColor(it)
-                }
+                .forEach { it.color = color }
         adapter.deselectTasks()
         actionMode?.finish()
     }
