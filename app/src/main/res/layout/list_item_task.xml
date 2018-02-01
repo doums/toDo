@@ -9,7 +9,8 @@
     card_view:cardCornerRadius="2dp"
     card_view:cardElevation="2dp"
     android:layout_margin="3dp"
-    card_view:contentPadding="10dp">
+    card_view:contentPadding="10dp"
+    android:foreground="?android:attr/selectableItemBackground">
 
     <RelativeLayout
         android:id="@+id/card_background"

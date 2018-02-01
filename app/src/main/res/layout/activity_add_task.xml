@@ -36,8 +36,8 @@
             android:fontFamily="@font/roboto_slab"
             android:inputType="textMultiLine"
             app:layout_constraintTop_toTopOf="parent"
+            android:imeOptions="flagNoExtractUi"
             style="@style/add_task_EditText"/>
-
 
     </ScrollView>
 </android.support.design.widget.CoordinatorLayout>
