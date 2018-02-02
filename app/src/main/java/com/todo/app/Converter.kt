@@ -3,7 +3,6 @@ package com.todo.app
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.TypedValue
-import android.view.WindowManager
 
 /**
  * Created by pierre on 31/01/18.
@@ -11,13 +10,11 @@ import android.view.WindowManager
 
 // singleton
 object Converter {
-    var windowManager: WindowManager? = null
+    var metrics: DisplayMetrics? = null
 
     fun convertDpToPx(dp: Float): Int {
-        if (windowManager == null)
+        if (metrics == null)
             Log.e("converter", "converter not initialized ")
-        val metrics = DisplayMetrics()
-        windowManager?.defaultDisplay?.getMetrics(metrics)
         val px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, metrics)
         Log.d("converter", "convertDpToPx: " + Math.round(px))
 

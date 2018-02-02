@@ -7,6 +7,7 @@ import android.support.v4.app.DialogFragment
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.*
+import android.util.DisplayMetrics
 import android.util.Log
 import android.widget.CheckBox
 import java.io.Serializable
@@ -68,7 +69,9 @@ class MainActivity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Converter.windowManager = windowManager
+        val metrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(metrics)
+        Converter.metrics = metrics
         setContentView(R.layout.activity_main)
 
         val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
