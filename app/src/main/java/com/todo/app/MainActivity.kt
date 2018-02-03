@@ -9,9 +9,9 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.*
 import android.util.DisplayMetrics
 import android.util.Log
-import android.widget.CheckBox
 import java.io.Serializable
 import android.view.*
+import android.support.v7.widget.helper.ItemTouchHelper
 
 class MainActivity
     :
@@ -22,12 +22,10 @@ class MainActivity
     private lateinit var adapter: TaskAdapter
     private var actionMode: ActionMode? = null
     private lateinit var recyclerView: RecyclerView
-    private var selectedTasksPosition: MutableList<Int> = mutableListOf()
 
     companion object {
         private const val ADD_TASK_REQUEST = 0
         private const val TASKS = "saved tasks"
-        private const val SELECTED_POSITIONS = "saved selected tasks"
     }
 
     private var actionModeCallback = object:ActionMode.Callback {
@@ -45,8 +43,7 @@ class MainActivity
 
             return when (id) {
                 R.id.action_delete_task -> {
-                    selectedTasksPosition.forEach {adapter.removeTask(it)}
-                    selectedTasksPosition.clear()
+                    adapter.removeSelectedTasks()
                     mode.finish()
                     true
                 }
@@ -59,11 +56,13 @@ class MainActivity
         }
 
         override fun onDestroyActionMode(mode: ActionMode) {
-            selectedTasksPosition.forEach {
-                adapter.notifyItemChanged(it)
+            adapter.selectedTasksPosition.forEach {
+                val viewHolder: RecyclerView.ViewHolder? = recyclerView.findViewHolderForAdapterPosition(it)
+                viewHolder?.itemView?.release(adapter.tasks[it].color)
             }
-            selectedTasksPosition.clear()
-            Log.d("test", "onDestroyActionMode")
+            adapter.selectedTasksPosition.clear()
+            if (adapter.state == TaskAdapter.State.OnSelect)
+                adapter.state = TaskAdapter.State.Idle
         }
     }
 
@@ -78,28 +77,22 @@ class MainActivity
         setSupportActionBar(toolbar)
 
         adapter = TaskAdapter(object : TouchListener {
-            override fun onTouch(view: View, position: Int) {
-                if (selectedTasksPosition.isEmpty()) {
-                    Log.d("test", "check")
-                    val completedCheckBox = view.findViewById(R.id.task_completed) as CheckBox
-                    completedCheckBox.isChecked = !completedCheckBox.isChecked
-                }
-                else {
-                    Log.d("test", "toggleSelection")
-                    toggleSelection(view, position)
-                }
+            override fun onStopSelect() {
+                actionMode?.finish()
             }
 
-            override fun onLongTouch(view: View, position: Int) {
-                if (!selectedTasksPosition.isEmpty()) return
+            override fun onStartSelect() {
                 actionMode = startActionMode(actionModeCallback)
-                toggleSelection(view, position)
             }
         })
 
         recyclerView = findViewById(R.id.task_list)
         recyclerView.layoutManager = getLayoutManager()
         recyclerView.adapter = adapter
+
+        val callback = ItemTouchHelperCallback(adapter)
+        val touchHelper = ItemTouchHelper(callback)
+        touchHelper.attachToRecyclerView(recyclerView)
         Log.d("test", "onCreate")
     }
 
@@ -124,7 +117,6 @@ class MainActivity
     override fun onSaveInstanceState(savedInstanceState: Bundle ) {
         super.onSaveInstanceState(savedInstanceState)
         savedInstanceState.putSerializable(TASKS, adapter.tasks as Serializable)
-        savedInstanceState.putSerializable(SELECTED_POSITIONS, selectedTasksPosition as Serializable)
         Log.d("test", "onSaveInstanceState")
     }
 
@@ -132,21 +124,8 @@ class MainActivity
         Log.d("test", "onRestoreInstanceState")
         super.onRestoreInstanceState(savedInstanceState)
         val tasks = savedInstanceState.getSerializable(TASKS)
-        val selected = savedInstanceState.getSerializable(SELECTED_POSITIONS)
         if (tasks != null)
             adapter.tasks = tasks as MutableList<Task>
-    }
-
-    private fun toggleSelection(view: View, position: Int) {
-        if (selectedTasksPosition.any({it == position})) {
-            view.setCardStyle(adapter.tasks[position].color.aRGB.toInt(), false)
-            selectedTasksPosition.remove(position)
-        }
-        else {
-            selectedTasksPosition.add(position)
-            view.setCardStyle(MaterialColor.Grey.aRGB.toInt(),true)
-        }
-        if (selectedTasksPosition.isEmpty()) actionMode?.finish()
     }
 
     private fun getLayoutManager():  StaggeredGridLayoutManager{
@@ -189,16 +168,18 @@ class MainActivity
         Log.d("test", "on add task activity result")
         if (requestCode == ADD_TASK_REQUEST && resultCode == Activity.RESULT_OK) {
             val task = data?.getSerializableExtra("Task") as Task
-            if (!task.description.isEmpty()) {
+            /*if (!task.description.isEmpty()) {*/    //todo uncomment for prod
                 var nb = -1
                 adapter.tasks
                         .asSequence()
                         .filter { it.id > nb }
                         .forEach { nb = it.id }
                 task.id = nb + 1
+            task.description = "id " + task.id    //todo for testing only
+            task.color = MaterialColor.Blue
                 adapter.addTask(task, 0)
                 recyclerView.scrollToPosition(0)
-            }
+            /*}*/  //todo uncomment for prod
         }
     }
 
@@ -221,12 +202,7 @@ class MainActivity
     }
 
     override fun onColorSelect(color: MaterialColor) {
-        selectedTasksPosition
-                .forEach {
-                    adapter.tasks[it].color = color
-                    adapter.notifyItemChanged(it)
-                }
-        selectedTasksPosition.clear()
+        adapter.recolorSelectedTasks(color)
         actionMode?.finish()
     }
 }
