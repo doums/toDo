@@ -167,18 +167,16 @@ class MainActivity
         Log.d("test", "on add task activity result")
         if (requestCode == ADD_TASK_REQUEST && resultCode == Activity.RESULT_OK) {
             val task = data?.getSerializableExtra("Task") as Task
-            /*if (!task.description.isEmpty()) {*/    //todo uncomment for prod
+            if (!task.description.isEmpty()) {
             var nb = -1
             adapter.tasks
                     .asSequence()
                     .filter { it.id > nb }
                     .forEach { nb = it.id }
             task.id = nb + 1
-            task.description = "id " + task.id    //todo for testing only
-            task.color = MaterialColor.Blue
             adapter.addTask(task, 0)
             recyclerView.scrollToPosition(0)
-            /*}*/  //todo uncomment for prod
+            }
         }
     }
 
