@@ -9,7 +9,7 @@ import android.widget.TextView
 import java.util.*
 
 fun View.pickUp() {
-    (this as CardView).setCardBackgroundColor(MaterialColor.Grey.aRGB.toInt())
+    (this as CardView).setCardBackgroundColor(MaterialColor.White.aRGB.toInt())
     this.cardElevation = Converter.convertDpToPx(8F).toFloat()
 }
 

@@ -17,6 +17,7 @@ enum class MaterialColor(val aRGB: Long, val colorName: String) {
     Orange(0xffffcc80, "Orange"),
     DeepOrange(0xffffab91, "Deep Orange"),
     Brown(0xffa1887f, "Brown"),
-    Grey(0xffeeeeee, "Grey"),
+    Grey(0xffe0e0e0, "Grey"),
+    White(0xffffffff, "White"),
     BlueGrey(0xffb0bec5, "Blue Grey")
 }
