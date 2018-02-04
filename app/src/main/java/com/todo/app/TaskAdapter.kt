@@ -32,7 +32,7 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
         RecyclerView.Adapter<TaskAdapter.TaskViewHolder>(),
         ItemTouchHelperAdapter {
 
-    enum class State {
+    private enum class State {
         OnSelect,
         OnMove,
         Idle
@@ -98,10 +98,9 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
     }
 
     fun deselectAll() {
+        Log.d("test", "deselectAll")
         if (state != TaskAdapter.State.OnMove) {
-            selectedTasksPosition.forEach {
-                notifyItemChanged(it)
-            }
+            selectedTasksPosition.forEach { notifyItemChanged(it) }
             selectedTasksPosition.clear()
             if (state == TaskAdapter.State.OnSelect)
                 state = TaskAdapter.State.Idle
@@ -110,10 +109,8 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
 
     private fun deselectAllExcept(position: Int) {
         selectedTasksPosition
-                .filter { it != position  }
-                .forEach {
-            notifyItemChanged(it)
-        }
+                .filter { it != position }
+                .forEach { notifyItemChanged(it) }
         selectedTasksPosition.clear()
     }
 
@@ -157,17 +154,13 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
 
     inner class TaskViewHolder(private var view: View) :
             RecyclerView.ViewHolder(view),
-            View.OnLongClickListener,
             View.OnClickListener,
             ItemTouchHelperViewHolder {
 
         private val descriptionTextView = view.findViewById(R.id.task_description) as TextView
         private val completedCheckBox = view.findViewById(R.id.task_completed) as CheckBox
 
-        init {
-            view.setOnLongClickListener(this)
-            view.setOnClickListener(this)
-        }
+        init { view.setOnClickListener(this) }
 
         fun bindTask(task: Task) {
             Log.d("viewHolder", "bindTask " + task.id)
@@ -205,27 +198,23 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
             }
         }
 
-        override fun onLongClick(v: View): Boolean {
+        override fun onItemSelected(v: View) {
+            Log.d("test", "onItemSelected")
             if (adapterPosition != RecyclerView.NO_POSITION) {
                 when (state) {
                     TaskAdapter.State.Idle -> {
-                        Log.d("test", "onLongClick Idle")
+                        Log.d("test", "onItemSelected Idle")
                         touchListener.onStartSelect()
                         state = State.OnSelect
                         selectTask(v, adapterPosition)
                     }
                     TaskAdapter.State.OnSelect -> {
-                        Log.d("test", "onLongClick onSelect")
+                        Log.d("test", "onItemSelected onSelect")
                         selectTask(v, adapterPosition)
                     }
-                    else -> return true
+                    else -> return
                 }
             }
-            return true
-        }
-
-        override fun onItemSelected() {
-            Log.d("test", "onItemSelected")
         }
 
         override fun onItemClear() {

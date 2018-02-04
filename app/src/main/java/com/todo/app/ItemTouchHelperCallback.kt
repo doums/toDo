@@ -34,7 +34,7 @@ class ItemTouchHelperCallback(private val adapter: TaskAdapter) : ItemTouchHelpe
 
     override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         if (actionState != ItemTouchHelper.ACTION_STATE_IDLE)
-            (viewHolder as? ItemTouchHelperViewHolder)?.onItemSelected()
+            (viewHolder as? ItemTouchHelperViewHolder)?.onItemSelected(viewHolder.itemView)
         super.onSelectedChanged(viewHolder, actionState)
     }
 
