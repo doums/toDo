@@ -40,7 +40,6 @@ class MainActivity
 
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             val id = item.itemId
-
             return when (id) {
                 R.id.action_delete_task -> {
                     adapter.removeSelectedTasks()
@@ -56,13 +55,7 @@ class MainActivity
         }
 
         override fun onDestroyActionMode(mode: ActionMode) {
-            adapter.selectedTasksPosition.forEach {
-                val viewHolder: RecyclerView.ViewHolder? = recyclerView.findViewHolderForAdapterPosition(it)
-                viewHolder?.itemView?.release(adapter.tasks[it].color)
-            }
-            adapter.selectedTasksPosition.clear()
-            if (adapter.state == TaskAdapter.State.OnSelect)
-                adapter.state = TaskAdapter.State.Idle
+            adapter.deselectAll()
         }
     }
 
@@ -161,7 +154,6 @@ class MainActivity
             }
             else -> super.onOptionsItemSelected(item)
         }
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

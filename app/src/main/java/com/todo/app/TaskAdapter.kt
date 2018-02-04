@@ -43,8 +43,8 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
             field = value
             notifyDataSetChanged()
         }
-    val selectedTasksPosition: MutableList<Int> = mutableListOf()
-    var state = State.Idle
+    private val selectedTasksPosition: MutableList<Int> = mutableListOf()
+    private var state = State.Idle
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
         val context = parent.context
@@ -76,7 +76,7 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
         selectedTasksPosition.forEach {
             if (it > position) {
                 val index = selectedTasksPosition.indexOf(it)
-                selectedTasksPosition[index] = it -1
+                selectedTasksPosition[index] = it - 1
             }
         }
     }
@@ -93,13 +93,37 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
     }
 
     fun recolorSelectedTasks(color: MaterialColor) {
+        Log.d("test", "recolor tasks")
         selectedTasksPosition.forEach { tasks[it].color = color }
+    }
+
+    fun deselectAll() {
+        if (state != TaskAdapter.State.OnMove) {
+            selectedTasksPosition.forEach {
+                notifyItemChanged(it)
+            }
+            selectedTasksPosition.clear()
+            if (state == TaskAdapter.State.OnSelect)
+                state = TaskAdapter.State.Idle
+        }
+    }
+
+    private fun deselectAllExcept(position: Int) {
+        selectedTasksPosition
+                .filter { it != position  }
+                .forEach {
+            notifyItemChanged(it)
+        }
+        selectedTasksPosition.clear()
     }
 
     override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
         Log.d("test", "onItemMove ")
-        if (state == State.OnSelect)
+        if (state == State.OnSelect) {
+            state = State.OnMove
             touchListener.onStopSelect()
+            deselectAllExcept(fromPosition)
+        }
         state = State.OnMove
         if (fromPosition < toPosition) {
             for (i in fromPosition until toPosition) {
@@ -146,10 +170,13 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
         }
 
         fun bindTask(task: Task) {
-            Log.d("viewHolder", "bindTask")
+            Log.d("viewHolder", "bindTask " + task.id)
             descriptionTextView.text = task.description
             completedCheckBox.isChecked = task.completed
-            view.release(task.color)
+            if (state == State.OnSelect && selectedTasksPosition.any { it == adapterPosition })
+                view.pickUp()
+            else
+                view.release(task.color)
             completedCheckBox.setOnCheckedChangeListener { _, isChecked ->
                 tasks[adapterPosition].completed = isChecked
             }
@@ -203,8 +230,12 @@ class TaskAdapter(private val touchListener: TouchListener, tasks: MutableList<T
 
         override fun onItemClear() {
             Log.d("test", "onItemClear")
-            if (state == State.OnMove)
+            if (state == State.OnSelect)
+                view.pickUp()
+            if (state == State.OnMove) {
                 state = State.Idle
+                view.release(tasks[adapterPosition].color)
+            }
         }
     }
 }
