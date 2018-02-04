@@ -11,6 +11,4 @@
     <string name="confirm">Yes</string>
     <string name="dialog_clear">Are you sure?</string>
     <string name="action_color">Colors</string>
-    <string name="action_date">Date</string>
-    <string name="action_remove_date">Remove Date</string>
 </resources>

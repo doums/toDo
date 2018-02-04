@@ -2,7 +2,6 @@ package com.todo.app
 
 import android.app.Activity
 import android.content.Intent
-import android.icu.util.Calendar
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.Toolbar
@@ -14,8 +13,8 @@ import java.io.Serializable
 
 class AddTaskActivity :
         AppCompatActivity(),
-        ColorDialogFragment.ColorDialogListener,
-        DateDialogFragment.DateDialogListener {
+        ColorDialogFragment.ColorDialogListener {
+
     private var task: Task = Task()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,10 +56,6 @@ class AddTaskActivity :
                 showColorDialog()
                 true
             }
-            R.id.action_date -> {
-                showDateDialog()
-                true
-            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -68,16 +63,6 @@ class AddTaskActivity :
     private fun showColorDialog() {
         val dialog = ColorDialogFragment()
         dialog.show(supportFragmentManager, "ColorDialogFragment")
-    }
-
-    private fun showDateDialog() {
-        val dialog = DateDialogFragment()
-        if (task.date != null) {
-            dialog.year = (task.date as Calendar).get(Calendar.YEAR)
-            dialog.month = (task.date as Calendar).get(Calendar.MONTH)
-            dialog.day = (task.date as Calendar).get(Calendar.DAY_OF_MONTH)
-        }
-        dialog.show(supportFragmentManager, "DateDialogFragment")
     }
 
     override fun onColorSelect(color: MaterialColor) {
@@ -97,13 +82,5 @@ class AddTaskActivity :
         task.color = color
         val view = findViewById(R.id.task_activity) as? View
         view?.setBackgroundColor(color.aRGB.toInt())
-    }
-
-    override fun onDateSelect(year: Int, month: Int, day: Int) {
-        val c = Calendar.getInstance()
-        c.set(year, Calendar.YEAR)
-        c.set(month, Calendar.MONTH)
-        c.set(day, Calendar.DAY_OF_MONTH)
-        task.date = c
     }
 }

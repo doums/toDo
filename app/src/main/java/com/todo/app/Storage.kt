@@ -64,7 +64,6 @@ object Storage {
                 Log.e(LOG_TAG, "Could not close the file.")
                 e.printStackTrace()
             }
-
         }
 
         return tasks

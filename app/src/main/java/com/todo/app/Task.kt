@@ -11,6 +11,5 @@ data class Task(
         var id: Int = 0,
         var description: String = "",
         var completed: Boolean = false,
-        var color: MaterialColor = MaterialColor.Grey,
-        var date: Calendar? = null
+        var color: MaterialColor = MaterialColor.Grey
 ) : Serializable

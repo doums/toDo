@@ -27,4 +27,18 @@ class ConverterTest {
         val px: Int = round(dp * (metrics.densityDpi.toFloat() / 160f)).toInt()
         assertEquals("convertDpToPx ", px, Converter.convertDpToPx(dp))
     }
+
+    @Test
+    fun test2() {
+        val dp = 10f
+        val px: Int = round(dp * (metrics.densityDpi.toFloat() / 160f)).toInt()
+        assertEquals("convertDpToPx ", px, Converter.convertDpToPx(dp))
+    }
+
+    @Test
+    fun test3() {
+        val dp = 0f
+        val px: Int = round(dp * (metrics.densityDpi.toFloat() / 160f)).toInt()
+        assertEquals("convertDpToPx ", px, Converter.convertDpToPx(dp))
+    }
 }
