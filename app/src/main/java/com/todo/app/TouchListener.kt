@@ -1,5 +1,6 @@
 package com.todo.app
 
+import android.support.v7.widget.RecyclerView
 
 /**
  * Created by pierre on 23/01/18.
@@ -7,4 +8,5 @@ package com.todo.app
 interface TouchListener {
     fun onStartSelect()
     fun onStopSelect()
+    fun onStartDrag(viewHolder: RecyclerView.ViewHolder)
 }

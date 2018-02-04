@@ -13,7 +13,7 @@ class ItemTouchHelperCallback(private val adapter: TaskAdapter) : ItemTouchHelpe
     }
 
     override fun isLongPressDragEnabled(): Boolean {
-        return true
+        return false
     }
 
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
@@ -32,11 +32,7 @@ class ItemTouchHelperCallback(private val adapter: TaskAdapter) : ItemTouchHelpe
         adapter.onItemDismiss(viewHolder.adapterPosition)
     }
 
-    override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
-        if (actionState != ItemTouchHelper.ACTION_STATE_IDLE)
-            (viewHolder as? ItemTouchHelperViewHolder)?.onItemSelected(viewHolder.itemView)
-        super.onSelectedChanged(viewHolder, actionState)
-    }
+    override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {}
 
     override fun clearView(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder?) {
         super.clearView(recyclerView, viewHolder)

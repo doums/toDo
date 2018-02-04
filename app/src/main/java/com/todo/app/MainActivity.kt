@@ -22,6 +22,7 @@ class MainActivity
     private lateinit var adapter: TaskAdapter
     private var actionMode: ActionMode? = null
     private lateinit var recyclerView: RecyclerView
+    private lateinit var itemTouchHelper: ItemTouchHelper
 
     companion object {
         private const val ADD_TASK_REQUEST = 0
@@ -69,23 +70,29 @@ class MainActivity
         val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
         setSupportActionBar(toolbar)
 
-        adapter = TaskAdapter(object : TouchListener {
-            override fun onStopSelect() {
-                actionMode?.finish()
-            }
+        adapter = TaskAdapter(
+                object : TouchListener {
+                    override fun onStopSelect() {
+                        actionMode?.finish()
+                    }
 
-            override fun onStartSelect() {
-                actionMode = startActionMode(actionModeCallback)
-            }
-        })
+                    override fun onStartSelect() {
+                        actionMode = startActionMode(actionModeCallback)
+                    }
+
+                    override fun onStartDrag(viewHolder: RecyclerView.ViewHolder) {
+                        itemTouchHelper.startDrag(viewHolder)
+                    }
+                }
+        )
 
         recyclerView = findViewById(R.id.task_list)
         recyclerView.layoutManager = getLayoutManager()
         recyclerView.adapter = adapter
 
         val callback = ItemTouchHelperCallback(adapter)
-        val touchHelper = ItemTouchHelper(callback)
-        touchHelper.attachToRecyclerView(recyclerView)
+        itemTouchHelper = ItemTouchHelper(callback)
+        itemTouchHelper.attachToRecyclerView(recyclerView)
         Log.d("test", "onCreate")
     }
 
@@ -161,16 +168,16 @@ class MainActivity
         if (requestCode == ADD_TASK_REQUEST && resultCode == Activity.RESULT_OK) {
             val task = data?.getSerializableExtra("Task") as Task
             /*if (!task.description.isEmpty()) {*/    //todo uncomment for prod
-                var nb = -1
-                adapter.tasks
-                        .asSequence()
-                        .filter { it.id > nb }
-                        .forEach { nb = it.id }
-                task.id = nb + 1
+            var nb = -1
+            adapter.tasks
+                    .asSequence()
+                    .filter { it.id > nb }
+                    .forEach { nb = it.id }
+            task.id = nb + 1
             task.description = "id " + task.id    //todo for testing only
             task.color = MaterialColor.Blue
-                adapter.addTask(task, 0)
-                recyclerView.scrollToPosition(0)
+            adapter.addTask(task, 0)
+            recyclerView.scrollToPosition(0)
             /*}*/  //todo uncomment for prod
         }
     }

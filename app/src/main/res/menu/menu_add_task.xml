@@ -13,4 +13,9 @@
         android:title="@string/action_color"
         android:icon="@drawable/ic_palette"
         app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_date"
+        android:title="@string/action_date"
+        android:icon="@drawable/ic_alarm_add"
+        app:showAsAction="ifRoom"/>
 </menu>
