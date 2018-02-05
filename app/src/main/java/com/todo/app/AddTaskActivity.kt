@@ -9,13 +9,13 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
-import java.io.Serializable
 
 class AddTaskActivity :
         AppCompatActivity(),
         ColorDialogFragment.ColorDialogListener {
 
     private var task: Task = Task()
+    private var position: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +27,16 @@ class AddTaskActivity :
         val ab = supportActionBar
         ab!!.setDisplayHomeAsUpEnabled(true)
 
-
+        val taskToUpdate = this.intent.getSerializableExtra("task") as Task?
+        if (taskToUpdate != null && !taskToUpdate.description.isEmpty()) {
+            task = taskToUpdate
+            position = this.intent.getIntExtra("position", -1)
+            val editText = findViewById<EditText>(R.id.task_description)
+            editText.setText(task.description)
+            editText.setSelection(task.description.length)
+            val view = findViewById(R.id.task_activity) as? View
+            view?.setBackgroundColor(task.color.aRGB.toInt())
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -47,7 +56,8 @@ class AddTaskActivity :
                 val data = Intent()
                 val description = findViewById(R.id.task_description) as? EditText
                 task.description = description?.text.toString()
-                data.putExtra("Task", task as Serializable)
+                data.putExtra("task", task)
+                data.putExtra("position", position)
                 setResult(Activity.RESULT_OK, data)
                 finish()
                 true
@@ -73,14 +83,15 @@ class AddTaskActivity :
 
     override fun onSaveInstanceState(savedInstanceState: Bundle ) {
         super.onSaveInstanceState(savedInstanceState)
-        savedInstanceState.putSerializable("color",  task.color)
+        savedInstanceState.putSerializable("task",  task)
+        savedInstanceState.putInt("position", position)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        val color = savedInstanceState.getSerializable("color") as MaterialColor
-        task.color = color
+        task = savedInstanceState.getSerializable("task") as Task
+        position = savedInstanceState.getInt("position", -1)
         val view = findViewById(R.id.task_activity) as? View
-        view?.setBackgroundColor(color.aRGB.toInt())
+        view?.setBackgroundColor(task.color.aRGB.toInt())
     }
 }

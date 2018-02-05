@@ -26,6 +26,7 @@ class MainActivity
 
     companion object {
         private const val ADD_TASK_REQUEST = 0
+        private const val EDIT_TASK_REQUEST = 1
         private const val TASKS = "saved tasks"
     }
 
@@ -51,6 +52,10 @@ class MainActivity
                     showColorDialog()
                     true
                 }
+                R.id.action_edit_task -> {
+                    onStartEditTask()
+                    true
+                }
                 else -> return false
             }
         }
@@ -72,6 +77,16 @@ class MainActivity
 
         adapter = TaskAdapter(
                 object : TouchListener {
+                    override fun onStopOneTaskSelected() {
+                        val item = actionMode?.menu?.findItem(R.id.action_edit_task)
+                        item?.isVisible = false
+                    }
+
+                    override fun onOneTaskSelected() {
+                        val item = actionMode?.menu?.findItem(R.id.action_edit_task)
+                        item?.isVisible = true
+                    }
+
                     override fun onStopSelect() {
                         actionMode?.finish()
                     }
@@ -166,7 +181,7 @@ class MainActivity
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d("test", "on add task activity result")
         if (requestCode == ADD_TASK_REQUEST && resultCode == Activity.RESULT_OK) {
-            val task = data?.getSerializableExtra("Task") as Task
+            val task = data?.getSerializableExtra("task") as Task
             if (!task.description.isEmpty()) {
             var nb = -1
             adapter.tasks
@@ -176,6 +191,18 @@ class MainActivity
             task.id = nb + 1
             adapter.addTask(task, 0)
             recyclerView.scrollToPosition(0)
+            }
+        }
+        if (requestCode == EDIT_TASK_REQUEST && resultCode == Activity.RESULT_OK) {
+            val task = data?.getSerializableExtra("task") as Task
+            val position = data.getIntExtra("position", -1)
+            if (position != -1 && task.description.isEmpty())
+                adapter.removeTask(position)
+            if (position != -1 && !task.description.isEmpty()) {
+                val oldTask = adapter.tasks.find { it.id == task.id }
+                oldTask?.color = task.color
+                oldTask?.description = task.description
+                adapter.notifyItemChanged(position)
             }
         }
     }
@@ -200,6 +227,19 @@ class MainActivity
 
     override fun onColorSelect(color: MaterialColor) {
         adapter.recolorSelectedTasks(color)
+        actionMode?.finish()
+    }
+
+    private fun onStartEditTask() {
+        val task = adapter.getSelectedTask()
+        val position = adapter.getSelectedPosition()
+        if (task != null && position != null) {
+            Log.d("test", "start add task activity for edit")
+            val intent = Intent(this, AddTaskActivity::class.java)
+            intent.putExtra("task", task)
+            intent.putExtra("position", position)
+            startActivityForResult(intent, EDIT_TASK_REQUEST)
+        }
         actionMode?.finish()
     }
 }

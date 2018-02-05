@@ -69,6 +69,12 @@ class TaskAdapter(
         notifyItemInserted(position)
     }
 
+    fun removeTask(position: Int) {
+        Log.d("test", "removeTask")
+        tasks.removeAt(position)
+        notifyItemRemoved(position)
+    }
+
     fun clearTasks() {
         Log.d("test", "clearTasks")
         tasks.clear()
@@ -148,6 +154,18 @@ class TaskAdapter(
         selectedTasksPosition.remove(position)
     }
 
+    fun getSelectedTask(): Task? {
+        if (selectedTasksPosition.size == 1)
+            return tasks[selectedTasksPosition.first()]
+        return null
+    }
+
+    fun getSelectedPosition(): Int? {
+        if (selectedTasksPosition.size == 1)
+            return selectedTasksPosition.first()
+        return null
+    }
+
     inner class TaskViewHolder(private var view: View) :
             RecyclerView.ViewHolder(view),
             View.OnClickListener,
@@ -192,6 +210,10 @@ class TaskAdapter(
                             touchListener.onStopSelect()
                             state = State.Idle
                         }
+                        if (selectedTasksPosition.size == 1)
+                            touchListener.onOneTaskSelected()
+                        if (selectedTasksPosition.size > 1)
+                            touchListener.onStopOneTaskSelected()
                     }
                     else -> return
                 }
@@ -206,6 +228,10 @@ class TaskAdapter(
                 state = State.OnSelect
                 touchListener.onStartDrag(this)
                 selectTask(v, adapterPosition)
+                if (selectedTasksPosition.size == 1)
+                    touchListener.onOneTaskSelected()
+                if (selectedTasksPosition.size > 1)
+                    touchListener.onStopOneTaskSelected()
             }
             return true
         }

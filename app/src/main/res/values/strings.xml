@@ -11,4 +11,5 @@
     <string name="confirm">Yes</string>
     <string name="dialog_clear">Are you sure?</string>
     <string name="action_color">Colors</string>
+    <string name="action_edit">Edit</string>
 </resources>

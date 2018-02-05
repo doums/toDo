@@ -9,4 +9,6 @@ interface TouchListener {
     fun onStartSelect()
     fun onStopSelect()
     fun onStartDrag(viewHolder: RecyclerView.ViewHolder)
+    fun onOneTaskSelected()
+    fun onStopOneTaskSelected()
 }
